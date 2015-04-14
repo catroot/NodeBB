@@ -141,10 +141,8 @@ define('admin/general/dashboard', ['semver'], function(semver) {
 						'<div>Connections</div>' +
 					'</div>';
 
-		var idle = data.socketCount - (data.users.home + data.users.topics + data.users.category);
-
 		updateRegisteredGraph(data.onlineRegisteredCount, data.onlineGuestCount);
-		updatePresenceGraph(data.users.home, data.users.topics, data.users.category, idle);
+		updatePresenceGraph(data.users);
 		updateTopicsGraph(data.topics);
 
 		$('#active-users').html(html);
@@ -248,46 +246,47 @@ define('admin/general/dashboard', ['semver'], function(semver) {
 		});
 
 		graphs.registered = new Chart(registeredCtx).Doughnut([{
-		        value: 1,
-		        color:"#F7464A",
-		        highlight: "#FF5A5E",
-		        label: "Registered Users"
-		    },
-		    {
-		        value: 1,
-		        color: "#46BFBD",
-		        highlight: "#5AD3D1",
-		        label: "Anonymous Users"
-		    }], {
-		    	responsive: true
-		    });
+				value: 1,
+				color:"#F7464A",
+				highlight: "#FF5A5E",
+				label: "Registered Users"
+			},
+			{
+				value: 1,
+				color: "#46BFBD",
+				highlight: "#5AD3D1",
+				label: "Anonymous Users"
+			}], {
+				responsive: true
+			});
 
 		graphs.presence = new Chart(presenceCtx).Doughnut([{
-		        value: 1,
-		        color:"#F7464A",
-		        highlight: "#FF5A5E",
-		        label: "On homepage"
-		    },
-		    {
-		        value: 1,
-		        color: "#46BFBD",
-		        highlight: "#5AD3D1",
-		        label: "Reading posts"
-		    },
-		    {
-		        value: 1,
-		        color: "#FDB45C",
-		        highlight: "#FFC870",
-		        label: "Browsing topics"
-		    },
-		    {
-		        value: 1,
-		        color: "#949FB1",
-		        highlight: "#A8B3C5",
-		        label: "Idle"
-		    }], {
-		    	responsive: true
-		    });
+				value: 1,
+				color:"#F7464A",
+				highlight: "#FF5A5E",
+				label: "On categories list"
+			},
+			{
+				value: 1,
+				color: "#46BFBD",
+				highlight: "#5AD3D1",
+				label: "Reading posts"
+			},
+			{
+				value: 1,
+				color: "#FDB45C",
+				highlight: "#FFC870",
+				label: "Browsing topics"
+			},
+			{
+				value: 1,
+				color: "#949FB1",
+				highlight: "#A8B3C5",
+				label: "Recent/Unread"
+			}
+			], {
+				responsive: true
+			});
 
 		graphs.topics = new Chart(topicsCtx).Doughnut([], {responsive: true});
 		topicsCanvas.onclick = function(evt){
@@ -334,8 +333,10 @@ define('admin/general/dashboard', ['semver'], function(semver) {
 
 			$('#pageViewsThisMonth').html(data.monthlyPageViews.thisMonth);
 			$('#pageViewsLastMonth').html(data.monthlyPageViews.lastMonth);
+			$('#pageViewsPastDay').html(data.pastDay);
 			utils.addCommasToNumbers($('#pageViewsThisMonth'));
 			utils.addCommasToNumbers($('#pageViewsLastMonth'));
+			utils.addCommasToNumbers($('#pageViewsPastDay'));
 		});
 	}
 
@@ -345,11 +346,12 @@ define('admin/general/dashboard', ['semver'], function(semver) {
 		graphs.registered.update();
 	}
 
-	function updatePresenceGraph(homepage, posts, topics, idle) {
-		graphs.presence.segments[0].value = homepage;
-		graphs.presence.segments[1].value = posts;
-		graphs.presence.segments[2].value = topics;
-		graphs.presence.segments[3].value = idle;
+	function updatePresenceGraph(users) {
+		graphs.presence.segments[0].value = users.categories;
+		graphs.presence.segments[1].value = users.topics;
+		graphs.presence.segments[2].value = users.category;
+		graphs.presence.segments[3].value = users.recent;
+
 		graphs.presence.update();
 	}
 
@@ -424,6 +426,9 @@ define('admin/general/dashboard', ['semver'], function(semver) {
 		function buildTopicsLegend() {
 			var legend = $('#topics-legend').html('');
 
+			segments.sort(function(a, b) {
+				return b.value - a.value;
+			});
 			for (var i = 0, ii = segments.length; i < ii; i++) {
 				var topic = segments[i],
 					label = topic.tid === '0' ? topic.label : '<a title="' + topic.label + '"href="' + RELATIVE_PATH + '/topic/' + topic.tid + '" target="_blank"> ' + topic.label + '</a>';

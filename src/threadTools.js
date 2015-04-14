@@ -35,7 +35,7 @@ var async = require('async'),
 				if (err) {
 					return callback(err);
 				}
-
+				topicData.deleted = isDelete ? 1 : 0;
 				ThreadTools[isDelete ? 'lock' : 'unlock'](tid, uid);
 				if (isDelete) {
 					plugins.fireHook('action:topic.delete', tid);
@@ -47,6 +47,7 @@ var async = require('async'),
 					tid: tid,
 					cid: topicData.cid,
 					isDelete: isDelete,
+					isLocked: isDelete,
 					uid: uid
 				};
 
@@ -193,6 +194,7 @@ var async = require('async'),
 					toCid: cid,
 					uid: uid
 				});
+				callback();
 			});
 		});
 	};

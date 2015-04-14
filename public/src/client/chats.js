@@ -1,8 +1,8 @@
 'use strict';
 
-/* globals define, app, ajaxify, utils, socket, templates, translator */
+/* globals define, app, ajaxify, utils, socket, templates */
 
-define('forum/chats', ['string', 'sounds', 'forum/infinitescroll'], function(S, sounds, infinitescroll) {
+define('forum/chats', ['string', 'sounds', 'forum/infinitescroll', 'translator'], function(S, sounds, infinitescroll, translator) {
 	var Chats = {
 		initialised: false
 	};
@@ -163,16 +163,7 @@ define('forum/chats', ['string', 'sounds', 'forum/infinitescroll'], function(S, 
 		});
 
 		socket.on('event:user_status_change', function(data) {
-			var userEl = $('.chats-list li[data-uid="' + data.uid +'"]');
-
-			if (userEl.length) {
-				var statusEl = userEl.find('.status');
-				translator.translate('[[global:' + data.status + ']]', function(translated) {
-					statusEl.attr('class', 'fa fa-circle status ' + data.status)
-						.attr('title', translated)
-						.attr('data-original-title', translated);
-				});
-			}
+			app.updateUserStatus($('.chats-list [data-uid="' + data.uid + '"] [component="user/status"]'), data.status);
 		});
 	};
 

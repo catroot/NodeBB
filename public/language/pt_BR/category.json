@@ -1,9 +1,12 @@
 {
     "new_topic_button": "Novo Tópico",
-    "guest-login-post": "Log in to post",
+    "guest-login-post": "Logue-se para postar",
     "no_topics": "<strong>Não tem nenhum tópico nesta categoria.</strong><br />Por que você não tenta postar o algum?",
     "browsing": "navegando",
     "no_replies": "Ninguém respondeu",
     "share_this_category": "Compartilhar esta categoria",
-    "ignore": "Ignorar"
+    "watch": "Watch",
+    "ignore": "Ignorar",
+    "watch.message": "You are now watching updates from this category",
+    "ignore.message": "You are now ignoring updates from this category"
 }

@@ -15,14 +15,15 @@ var async = require('async'),
 module.exports = function(User) {
 
 	User.updateProfile = function(uid, data, callback) {
+		var fields = ['username', 'email', 'fullname', 'website', 'location', 'birthday', 'signature'];
 
-		plugins.fireHook('filter:user.updateProfile', {uid: uid, settings: data}, function(err, data) {
-			if(err) {
+		plugins.fireHook('filter:user.updateProfile', {uid: uid, data: data, fields: fields}, function(err, data) {
+			if (err) {
 				return callback(err);
 			}
 
-			data = data.settings;
-			var fields = ['username', 'email', 'fullname', 'website', 'location', 'birthday', 'signature'];
+			fields = data.fields;
+			data = data.data;
 
 			function isSignatureValid(next) {
 				if (data.signature !== undefined && data.signature.length > meta.config.maximumSignatureLength) {
@@ -110,7 +111,6 @@ module.exports = function(User) {
 				}
 
 				data[field] = data[field].trim();
-				data[field] = validator.escape(data[field]);
 
 				if (field === 'email') {
 					return updateEmail(uid, data.email, next);
@@ -121,8 +121,8 @@ module.exports = function(User) {
 				} else if (field === 'signature') {
 					data[field] = S(data[field]).stripTags().s;
 				} else if (field === 'website') {
-					if (!data[field].startsWith(validator.escape('http://')) && !data[field].startsWith(validator.escape('https://'))) {
-						data[field] = validator.escape('http://') + data[field];
+					if (!data[field].startsWith('http://') && !data[field].startsWith('https://')) {
+						data[field] = 'http://' + data[field];
 					}
 				}
 
@@ -161,7 +161,7 @@ module.exports = function(User) {
 					},
 					function(next) {
 						if (parseInt(meta.config.requireEmailConfirmation, 10) === 1 && newEmail) {
-							User.email.verify(uid, newEmail);
+							User.email.sendValidationEmail(uid, newEmail);
 						}
 						User.setUserField(uid, 'email:confirmed', 0, next);
 					},
@@ -256,7 +256,10 @@ module.exports = function(User) {
 					return callback(err);
 				}
 
-				User.setUserField(data.uid, 'password', hash, callback);
+				async.parallel([
+					async.apply(User.setUserField, data.uid, 'password', hash),
+					async.apply(User.reset.updateExpiry, data.uid)
+				], callback);
 			});
 		}
 

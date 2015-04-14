@@ -1,7 +1,7 @@
 "use strict";
-/* globals app, config, define, socket, translator, templates, utils, ajaxify */
+/* globals app, config, define, socket, templates, utils, ajaxify */
 
-define('chat', ['taskbar', 'string', 'sounds', 'forum/chats'], function(taskbar, S, sounds, Chats) {
+define('chat', ['taskbar', 'string', 'sounds', 'forum/chats', 'translator'], function(taskbar, S, sounds, Chats, translator) {
 
 	var module = {};
 	var newMessage = false;
@@ -118,7 +118,7 @@ define('chat', ['taskbar', 'string', 'sounds', 'forum/chats'], function(taskbar,
 
 		socket.on('event:user_status_change', function(data) {
 			var modal = module.getModal(data.uid);
-			updateStatus(modal, data.status);
+			app.updateUserStatus(modal.find('[component="user/status"]'), data.status);
 		});
 	};
 
@@ -153,20 +153,12 @@ define('chat', ['taskbar', 'string', 'sounds', 'forum/chats'], function(taskbar,
 			if (err) {
 				return app.alertError(err.message);
 			}
-			updateStatus(chatModal, status);
-		});
-	}
 
-	function updateStatus(chatModal, status) {
-		translator.translate('[[global:' + status + ']]', function(translated) {
-			chatModal.find('#chat-user-status').attr('class', 'fa fa-circle status ' + status)
-				.attr('title', translated)
-				.attr('data-original-title', translated);
+			app.updateUserStatus(chatModal.find('[component="user/status"]'), status);
 		});
 	}
 
 	module.createModal = function(username, touid, callback) {
-
 		templates.parse('chat', {}, function(chatTpl) {
 			translator.translate(chatTpl, function (chatTpl) {
 

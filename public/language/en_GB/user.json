@@ -29,6 +29,7 @@
 	"chat": "Chat",
 	"follow": "Follow",
 	"unfollow": "Unfollow",
+	"more": "More",
 
 	"profile_update_success": "Profile has been updated successfully!",
 	"change_picture": "Change Picture",
@@ -51,7 +52,6 @@
 	"upload_picture": "Upload picture",
 	"upload_a_picture": "Upload a picture",
 	"image_spec": "You may only upload PNG, JPG, or GIF files",
-	"max": "max.",
 
 	"settings": "Settings",
 	"show_email": "Show My Email",
@@ -91,5 +91,6 @@
 	"follow_topics_you_reply_to": "Follow topics that you reply to.",
 	"follow_topics_you_create": "Follow topics you create.",
 
-	"grouptitle": "Select the group title you would like to display"
+	"grouptitle": "Select the group title you would like to display",
+	"no-group-title": "No group title"
 }

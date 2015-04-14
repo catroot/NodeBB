@@ -48,6 +48,12 @@
 		<form>
 			<div class="checkbox">
 				<label>
+					<input type="checkbox" data-field="allowProfileImageUploads"> <strong>Allow users to upload profile images</strong>
+				</label>
+			</div>
+
+			<div class="checkbox">
+				<label>
 					<input type="checkbox" data-field="profile:convertProfileImageToPNG"> <strong>Convert profile image uploads to PNG</strong>
 				</label>
 			</div>
@@ -101,6 +107,10 @@
 			<div class="form-group">
 				<label>Days to remember user login sessions</label>
 				<input type="text" class="form-control" data-field="loginDays" placeholder="14" />
+			</div>
+			<div class="form-group">
+				<label>Force password reset after a set number of days</label>
+				<input type="text" class="form-control" data-field="passwordExpiryDays" placeholder="0" />
 			</div>
 		</form>
 	</div>

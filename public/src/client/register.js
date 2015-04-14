@@ -1,9 +1,9 @@
 'use strict';
 
-/* globals define, app, utils, socket, config, translator */
+/* globals define, app, utils, socket, config */
 
 
-define('forum/register', ['csrf'], function(csrf) {
+define('forum/register', ['csrf', 'translator'], function(csrf, translator) {
 	var Register = {},
 		validationError = false,
 		successIcon = '<i class="fa fa-check"></i>';
@@ -24,8 +24,9 @@ define('forum/register', ['csrf'], function(csrf) {
 			}
 		});
 
+		// Update the "others can mention you via" text
 		username.on('keyup', function() {
-			$('#yourUsername').text(this.value.length > 0 ? this.value : 'username');
+			$('#yourUsername').text(this.value.length > 0 ? utils.slugify(this.value) : 'username');
 		});
 
 		username.on('blur', function() {

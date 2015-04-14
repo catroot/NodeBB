@@ -1,8 +1,8 @@
 'use strict';
 
-/* globals define, ajaxify, socket, app, config, utils, translator, bootbox */
+/* globals define, ajaxify, socket, app, config, utils, bootbox */
 
-define('forum/account/edit', ['forum/account/header', 'uploader'], function(header, uploader) {
+define('forum/account/edit', ['forum/account/header', 'uploader', 'translator'], function(header, uploader, translator) {
 	var AccountEdit = {},
 		gravatarPicture = '',
 		uploadedPicture = '',
@@ -203,7 +203,7 @@ define('forum/account/edit', ['forum/account/header', 'uploader'], function(head
 				if (!url) {
 					return;
 				}
-				socket.emit('user.uploadProfileImageFromUrl', url, function(err, imageUrlOnServer) {
+				socket.emit('user.uploadProfileImageFromUrl', {url: url, uid: ajaxify.variables.get('theirid')}, function(err, imageUrlOnServer) {
 					if (err) {
 						return app.alertError(err.message);
 					}
@@ -220,7 +220,9 @@ define('forum/account/edit', ['forum/account/header', 'uploader'], function(head
 
 	function handleEmailConfirm() {
 		$('#confirm-email').on('click', function() {
+			var btn = $(this).attr('disabled', true);
 			socket.emit('user.emailConfirm', {}, function(err) {
+				btn.removeAttr('disabled');
 				if (err) {
 					return app.alertError(err.message);
 				}
@@ -240,25 +242,30 @@ define('forum/account/edit', ['forum/account/header', 'uploader'], function(head
 		var successIcon = '<i class="fa fa-check"></i>';
 
 		function onPasswordChanged() {
-			passwordvalid = utils.isPasswordValid(password.val());
 			if (password.val().length < config.minimumPasswordLength) {
 				showError(password_notify, '[[user:change_password_error_length]]');
-			} else if (!passwordvalid) {
+				passwordvalid = false;
+			} else if (!utils.isPasswordValid(password.val())) {
 				showError(password_notify, '[[user:change_password_error]]');
+				passwordvalid = false;
 			} else {
 				showSuccess(password_notify, successIcon);
+				passwordvalid = true;
 			}
 		}
 
 		function onPasswordConfirmChanged() {
-			if(password.val()) {
-				if (password.val() !== password_confirm.val()) {
-					showError(password_confirm_notify, '[[user:change_password_error_match]]');
-					passwordsmatch = false;
-				} else {
+			if (password.val() !== password_confirm.val()) {
+				showError(password_confirm_notify, '[[user:change_password_error_match]]');
+				passwordsmatch = false;
+			} else {
+				if (password.val()) {
 					showSuccess(password_confirm_notify, successIcon);
-					passwordsmatch = true;
+				} else {
+					removeAlert(password_confirm_notify);
 				}
+
+				passwordsmatch = true;
 			}
 		}
 
@@ -266,6 +273,9 @@ define('forum/account/edit', ['forum/account/header', 'uploader'], function(head
 		password_confirm.on('blur', onPasswordConfirmChanged);
 
 		$('#changePasswordBtn').on('click', function() {
+			onPasswordChanged();
+			onPasswordConfirmChanged();
+
 			var btn = $(this);
 			if ((passwordvalid && passwordsmatch) || app.user.isAdmin) {
 				btn.addClass('disabled').find('i').removeClass('hide');
@@ -282,11 +292,21 @@ define('forum/account/edit', ['forum/account/header', 'uploader'], function(head
 					passwordvalid = false;
 
 					if (err) {
+						onPasswordChanged();
+						onPasswordConfirmChanged();
 						return app.alertError(err.message);
 					}
 
 					app.alertSuccess('[[user:change_password_success]]');
 				});
+			} else {
+				if (!passwordsmatch) {
+					app.alertError('[[user:change_password_error_match]]');
+				}
+
+				if (!passwordvalid) {
+					app.alertError('[[user:change_password_error]]');
+				}
 			}
 			return false;
 		});
@@ -347,6 +367,11 @@ define('forum/account/edit', ['forum/account/header', 'uploader'], function(head
 				.addClass('alert-success');
 			element.show();
 		});
+	}
+
+	function removeAlert(element) {
+		element.html('');
+		element.parent().removeClass('alert-success alert-danger');
 	}
 
 	return AccountEdit;

@@ -89,10 +89,14 @@ var cache = LRU({
 							tid: tid,
 							cid: results.cid,
 							uid: postData.uid,
-							mainPid: data.pid,
-							title: title,
-							slug: tid + '/' + utils.slugify(title)
+							mainPid: data.pid
 						};
+
+						if (title) {
+							topicData.title = title;
+							topicData.slug = tid + '/' + utils.slugify(title);
+						}
+
 						if (options.topic_thumb) {
 							topicData.thumb = options.topic_thumb;
 						}
@@ -111,6 +115,7 @@ var cache = LRU({
 									cid: results.cid,
 									uid: postData.uid,
 									title: validator.escape(title),
+									slug: topicData.slug,
 									isMainPost: results.isMain,
 									tags: tags
 								});
